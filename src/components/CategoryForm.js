@@ -21,7 +21,7 @@ const CategoryForm = ({ onSubmit }) => {
       />
       <Input
         type="number"
-        step="0.01"
+        step="1.00"
         placeholder="Budget"
         value={budget}
         onChange={(e) => setBudget(e.target.value)}

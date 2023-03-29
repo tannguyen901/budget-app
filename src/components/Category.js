@@ -1,28 +1,40 @@
 import React, { useState } from 'react';
-
-const Category = ({ title, budget, spent, onUpdateRemaining }) => {
+import {
+  Container,
+  Content,
+  CategoryContainer,
+  CategoryTitle,
+  Button,
+  Input
+} from "../styles/styles";
+const Category = ({ title, budget, spent, onUpdateRemaining, onDelete  }) => {
   const [remainingInput, setRemainingInput] = useState(budget - spent);
 
   const handleSave = () => {
     onUpdateRemaining(title, parseFloat(remainingInput));
   };
 
+  const handleDelete = () => {
+    onDelete(title)
+  }
+
   return (
-    <div>
-      <h3>{title}</h3>
+    <CategoryContainer>
+      <CategoryTitle>{title}</CategoryTitle>
       <p>Spent: {spent}</p>
       <p>
         Remaining:
-        <input
+        <Input
           type="number"
-          step="0.01"
+          step="1.00"
           min="0"
           value={remainingInput}
           onChange={(e) => setRemainingInput(e.target.value)}
         />
-        <button onClick={handleSave}>Save</button>
+        <Button onClick={handleSave}>Save</Button>
+        <Button onClick={handleDelete}>Delete</Button>
       </p>
-    </div>
+    </CategoryContainer>
   );
 };
 

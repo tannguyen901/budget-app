@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Form, Input, Select, Button } from '../styles/styles';
 
 const ExpenseForm = ({ categories, onSubmit, onUpdateSpent }) => {
-  const [date, setDate] = useState('');
+  const [date, setDate] = useState(new Date().toISOString().substr(0, 10));
   const [amount, setAmount] = useState('');
   const [category, setCategory] = useState('');
 
@@ -26,7 +26,7 @@ const ExpenseForm = ({ categories, onSubmit, onUpdateSpent }) => {
       />
       <Input
         type="number"
-        step="0.01"
+        step="1.00"
         placeholder="Amount"
         value={amount}
         onChange={(e) => setAmount(e.target.value)}
