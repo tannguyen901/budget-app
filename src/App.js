@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useMemo } from "react";
 import {
   PieChart,
   Pie,
@@ -16,7 +16,6 @@ import {
 } from "recharts";
 
 import Category from "./components/Category";
-import ExpenseForm from "./components/ExpenseForm";
 import CategoryForm from "./components/CategoryForm";
 import {
   Container,
@@ -24,25 +23,31 @@ import {
   CategoryContainer,
   CategoryTitle,
   Button
-} from "../src/styles/styles";
+} from "./styles/styles";
 
 const App = () => {
   const [chartType, setChartType] = useState("pie");
   const [categories, setCategories] = useState([
-    { title: "Groceries", budget: 300, spent: 150 },
-    { title: "Entertainment", budget: 100, spent: 50 },
+    { title: "Groceries", budget: 300, spent: 150, expenses: [] },
+    { title: "Entertainment", budget: 100, spent: 50, expenses: [] },
   ]);
 
-  const totalSpent = categories.reduce(
-    (total, category) => total + category.spent,
-    0
+  const COLORS = useMemo(
+    () => ["#FF6384", "#36A2EB", "#FFCE56", "#4BC0C0"],
+    []
   );
-  const COLORS = ["#FF6384", "#36A2EB", "#FFCE56", "#4BC0C0"];
-  const pieChartData = categories.map((category, index) => ({
-    name: category.title,
-    value: category.spent,
-    color: COLORS[index % COLORS.length],
-  }));
+
+  const totalSpent = useMemo(() =>
+    categories.reduce((total, category) => total + category.spent, 0)
+  , [categories]);
+
+  const pieChartData = useMemo(() =>
+    categories.map((category, index) => ({
+      name: category.title,
+      value: category.spent,
+      color: COLORS[index % COLORS.length],
+    }))
+  , [categories]);
 
   const handleChartToggle = () => {
     if (chartType === "bar") {
@@ -117,32 +122,18 @@ const App = () => {
     setCategories([...categories, category]);
   };
 
-  const updateRemaining = (title, newRemaining) => {
+  const addSpending = (title, amount, subcategory, item) => {
+    const timestamp = new Date().toLocaleString(); // Add a timestamp
     setCategories(
       categories.map((category) =>
         category.title === title
-          ? { ...category, budget: newRemaining + category.spent }
-          : category
-      )
-    );
-  };
-
-  const updateSpent = (title, newSpent) => {
-    setCategories(
-      categories.map((category) =>
-        category.title === title ? { ...category, spent: newSpent } : category
-      )
-    );
-  };
-
-  const addExpense = (expense) => {
-    setCategories(
-      categories.map((category) =>
-        category.title === expense.category
           ? {
               ...category,
-              spent: category.spent + expense.amount,
-              budget: category.budget - expense.amount,
+              spent: category.spent + amount,
+              expenses: [
+                ...category.expenses,
+                { amount, subcategory, item, timestamp },
+              ],
             }
           : category
       )
@@ -158,31 +149,33 @@ const App = () => {
       <Content>
         <h1>Budget Planner</h1>
         <CategoryForm onSubmit={addCategory} />
-        <ExpenseForm
-          categories={categories}
-          onSubmit={addExpense}
-          onUpdateSpent={updateSpent}
-        />
         <div>
-          {categories.map((category, index) => (
-            <Category
-              key={index}
-              title={category.title}
-              budget={category.budget}
-              spent={category.spent}
-              onUpdateRemaining={updateRemaining}
-              onDelete={deleteCategory}
-            />
-          ))}
-        </div>
+        {categories.map((category, index) => (
+          <Category
+            key={index}
+            title={category.title}
+            spent={category.spent}
+            onDelete={deleteCategory}
+            addSpending={addSpending}
+          >
+            <ul>
+              {category.expenses.map((expense, idx) => (
+                <li key={idx}>
+                  {expense.item} - {expense.subcategory} - ${expense.amount} - {expense.timestamp}
+                </li>
+              ))}
+            </ul>
+          </Category>
+        ))}
+      </div>
         <CategoryContainer>
           <CategoryTitle>Total Spent: {totalSpent}</CategoryTitle>
           <ResponsiveContainer width="100%" height={300}>
-      {renderChart()}
-      </ResponsiveContainer>
-      <Button onClick={handleChartToggle}>
-      Switch to {chartType === "bar" ? "Line" : chartType === "line" ? "Pie" : "Bar"} Chart
-    </Button>
+            {renderChart()}
+          </ResponsiveContainer>
+          <Button onClick={handleChartToggle}>
+            Switch to {chartType === "bar" ? "Line" : chartType === "line" ? "Pie" : "Bar"} Chart
+          </Button>
         </CategoryContainer>
       </Content>
     </Container>
@@ -190,3 +183,4 @@ const App = () => {
 };
 
 export default App;
+

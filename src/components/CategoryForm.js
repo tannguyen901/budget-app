@@ -1,30 +1,25 @@
 import React, { useState } from 'react';
 import { Form, Input, Button } from '../styles/styles';
+
 const CategoryForm = ({ onSubmit }) => {
-  const [title, setTitle] = useState('');
-  const [budget, setBudget] = useState('');
+  const [title, setTitle] = useState("");
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    onSubmit({ title, budget: parseFloat(budget), spent: 0 });
-    setTitle('');
-    setBudget('');
+
+    if (title.trim() === "") return;
+
+    onSubmit({ title });
+    setTitle("");
   };
 
   return (
     <Form onSubmit={handleSubmit}>
       <Input
         type="text"
-        placeholder="Category"
         value={title}
         onChange={(e) => setTitle(e.target.value)}
-      />
-      <Input
-        type="number"
-        step="1.00"
-        placeholder="Budget"
-        value={budget}
-        onChange={(e) => setBudget(e.target.value)}
+        placeholder="Enter category name"
       />
       <Button type="submit">Add Category</Button>
     </Form>
