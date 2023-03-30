@@ -13,6 +13,8 @@ import {
   Tooltip,
   Legend,
   ResponsiveContainer,
+  ScatterChart,
+  Scatter,
 } from "recharts";
 
 import Category from "./components/Category";
@@ -22,7 +24,8 @@ import {
   Content,
   CategoryContainer,
   CategoryTitle,
-  Button
+  Button,
+  Title
 } from "./styles/styles";
 
 const App = () => {
@@ -47,17 +50,7 @@ const App = () => {
       value: category.spent,
       color: COLORS[index % COLORS.length],
     }))
-  , [categories]);
-
-  const handleChartToggle = () => {
-    if (chartType === "bar") {
-      setChartType("line");
-    } else if (chartType === "line") {
-      setChartType("pie");
-    } else {
-      setChartType("bar");
-    }
-  };
+  , [categories, COLORS]);
 
   const renderChart = () => {
     switch (chartType) {
@@ -113,6 +106,26 @@ const App = () => {
             </PieChart>
           </ResponsiveContainer>
         );
+        case "scatter":
+      return (
+        <ResponsiveContainer width="100%" height={300}>
+        <ScatterChart>
+          <XAxis dataKey="name" />
+          <YAxis dataKey="value" />
+          <CartesianGrid />
+          <Tooltip />
+          <Legend />
+          <Scatter data={pieChartData} fill="#8884d8">
+            {pieChartData.map((entry, index) => (
+              <Cell
+                key={`cell-${index}`}
+                fill={COLORS[index % COLORS.length]}
+              />
+            ))}
+          </Scatter>
+        </ScatterChart>
+      </ResponsiveContainer>
+      );
       default:
         return null;
     }
@@ -122,23 +135,20 @@ const App = () => {
     setCategories([...categories, category]);
   };
 
-  const addSpending = (title, amount, subcategory, item) => {
-    const timestamp = new Date().toLocaleString(); // Add a timestamp
+  const addSpending = (title, updatedExpenses, amount) => {
     setCategories(
       categories.map((category) =>
         category.title === title
           ? {
               ...category,
               spent: category.spent + amount,
-              expenses: [
-                ...category.expenses,
-                { amount, subcategory, item, timestamp },
-              ],
+              expenses: updatedExpenses,
             }
           : category
       )
     );
   };
+  
   
   const deleteCategory = (title) => {
     setCategories(categories.filter((category) => category.title !== title));
@@ -147,8 +157,7 @@ const App = () => {
   return (
     <Container>
       <Content>
-        <h1>Budget Planner</h1>
-        <CategoryForm onSubmit={addCategory} />
+        <Title>Budget Planner</Title>
         <div>
         {categories.map((category, index) => (
           <Category
@@ -157,28 +166,44 @@ const App = () => {
             spent={category.spent}
             onDelete={deleteCategory}
             addSpending={addSpending}
+            expenses={category.expenses}
           >
-            <ul>
-              {category.expenses.map((expense, idx) => (
-                <li key={idx}>
-                  {expense.item} - {expense.subcategory} - ${expense.amount} - {expense.timestamp}
-                </li>
-              ))}
-            </ul>
           </Category>
         ))}
       </div>
-        <CategoryContainer>
-          <CategoryTitle>Total Spent: {totalSpent}</CategoryTitle>
-          <ResponsiveContainer width="100%" height={300}>
-            {renderChart()}
-          </ResponsiveContainer>
-          <Button onClick={handleChartToggle}>
-            Switch to {chartType === "bar" ? "Line" : chartType === "line" ? "Pie" : "Bar"} Chart
-          </Button>
-        </CategoryContainer>
-      </Content>
-    </Container>
+      <CategoryContainer>
+      <CategoryTitle>Total Spent: {totalSpent}</CategoryTitle>
+      <ResponsiveContainer width="100%" height={300}>{renderChart()}</ResponsiveContainer>
+      <div>
+        <Button
+          onClick={() => setChartType("pie")}
+          active={chartType === "pie"}
+        >
+          Pie Chart
+        </Button>
+        <Button
+          onClick={() => setChartType("bar")}
+          active={chartType === "bar"}
+        >
+          Bar Chart
+        </Button>
+        <Button
+          onClick={() => setChartType("line")}
+          active={chartType === "line"}
+        >
+          Line Chart
+        </Button>
+        <Button
+          onClick={() => setChartType("scatter")}
+          active={chartType === "scatter"}
+        >
+          Bubble Chart
+        </Button>
+      </div>
+      </CategoryContainer>
+      <CategoryForm onSubmit={addCategory} />
+  </Content>
+</Container>
   );
 };
 

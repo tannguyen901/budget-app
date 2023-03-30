@@ -1,58 +1,50 @@
-import React, { useState } from 'react';
+import React from "react";
+import PropTypes from "prop-types";
+import ExpenseList from "./ExpenseList";
 import {
-  Container,
-  Content,
-  CategoryContainer,
+  CategoryWrapper,
   CategoryTitle,
-  Button,
-  Input
+  CategorySpent,
+  DeleteButton,
+  CategoryInfoContainer,
 } from "../styles/styles";
 
-const Category = ({ title, spent, onDelete, addSpending  }) => {
-  const [amount, setAmount] = useState("");
-  const [subcategory, setSubcategory] = useState("");
-  const [item, setItem] = useState(""); // Add state for the specific item
-
-  const handleApply = () => {
-    if (isNaN(amount) || amount <= 0) return;
-
-    addSpending(title, parseFloat(amount), subcategory, item); // Pass the item to addSpending
-    setAmount("");
-    setSubcategory("");
-    setItem(""); // Reset item field
-  };
+const Category = ({
+  title,
+  spent,
+  onDelete,
+  addSpending,
+  expenses,
+}) => {
 
   const handleDelete = () => {
-    onDelete(title)
-  }
+    onDelete(title);
+  };
+
+  const handleAddSpending = (updatedExpenses, amount) => {
+    addSpending(title, updatedExpenses, amount);
+  };
+  
+  
 
   return (
-    <CategoryContainer>
-      <CategoryTitle>{title}</CategoryTitle>
-      <p>Spent: {spent}</p>
-      <p>
-      Item:
-      <Input
-        type="text"
-        value={item}
-        onChange={(e) => setItem(e.target.value)}
-        placeholder="Enter item"
-      />
-    </p>
-      <p>
-        Cost:
-        <Input
-          type="number"
-          step="1.00"
-          min="0"
-          value={amount} // Update the value attribute to use amount state
-          onChange={(e) => setAmount(e.target.value)} // Update the onChange attribute to use setAmount
-        />
-        <Button onClick={handleApply }>Apply</Button>
-        <Button onClick={handleDelete}>Delete</Button>
-      </p>
-    </CategoryContainer>
+    <CategoryWrapper>
+      <CategoryInfoContainer>
+        <CategoryTitle>{title}</CategoryTitle>
+        <CategorySpent>Spent: ${spent}</CategorySpent>
+        <DeleteButton onClick={handleDelete}>Delete</DeleteButton>
+      </CategoryInfoContainer>
+      <ExpenseList expenses={expenses} onSubmit={handleAddSpending} />
+    </CategoryWrapper>
   );
+};
+
+Category.propTypes = {
+  title: PropTypes.string.isRequired,
+  spent: PropTypes.number.isRequired,
+  onDelete: PropTypes.func.isRequired,
+  addSpending: PropTypes.func.isRequired,
+  expenses: PropTypes.array.isRequired,
 };
 
 export default Category;

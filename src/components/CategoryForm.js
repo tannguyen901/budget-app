@@ -9,7 +9,7 @@ const CategoryForm = ({ onSubmit }) => {
 
     if (title.trim() === "") return;
 
-    onSubmit({ title });
+    onSubmit({ title, spent:0, expenses: [] });
     setTitle("");
   };
 
